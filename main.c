@@ -1,7 +1,14 @@
+/*
+ * db uhh style?
+ * fields:   email, password, isadmin, uhhh purchased id or wtv it was called
+ * size  :    [32]     [64]     [1]                   [16]
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define MAX_INPUT_LENGTH 256
+#define MAX_INPUT_LENGTH 64
 
 #ifdef _WIN32
 #define CLEAR "cls"
@@ -10,12 +17,15 @@
 #define CLEAR "clear"
 #endif
 
-typedef struct {
+typedef struct Page {
   char* content;
-  int (*inputHandler)(char[], int);
+  int (*inputHandler)(char[], int, struct Page*);
+  struct Page* pages;
 } Page;
 
-int ih_Welcome(char input[], int inputNum) {
+Page p_Login, p_Dashboard;
+
+int ih_Welcome(char input[], int inputNum, Page* p_Curr) {
   if (inputNum == 1) {
     // check if is valid student email
     char* str = "@snu.edu.in";
@@ -32,22 +42,27 @@ int ih_Welcome(char input[], int inputNum) {
       }
     }
   } else if (inputNum == 2) {
-    printf("is password\n");
+    // TODO
+    if (0) return 1;
+    *p_Curr = p_Dashboard;
+    return 0;
   }
   return 0;
 }
 
 int main() {
-  Page p_Login, p_Curr;
+  Page p_Curr;
 
-  p_Login.content = "WELCOME!\nEmail: %\nPassword: %\n";
+  p_Login.content = "WELCOME!\nEmail: $Password: $\n";
   p_Login.inputHandler = ih_Welcome;
+
+  p_Dashboard.content = "Hi, ^\n$\n";
 
   p_Curr = p_Login;
 
   int error = 0;
   while (1) {
-    //system(CLEAR);
+    system(CLEAR);
     if (error) {
       printf("ERROR! Make sure to enter the correct input!\n");
       error = 0;
@@ -58,7 +73,7 @@ int main() {
     while ((c = p_Curr.content[i++]) != '\0') {
       if (c == '%') {
         fgets(input, MAX_INPUT_LENGTH, stdin);
-        if (p_Curr.inputHandler(input, inputNum)) {
+        if (p_Curr.inputHandler(input, inputNum, &p_Curr)) {
           error = 1;
           break;
         }
